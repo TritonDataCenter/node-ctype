@@ -246,27 +246,31 @@ Read unsigned integers from a buffer:
 Number ruint8(buffer, endian, offset);
 Number ruint16(buffer, endian, offset);
 Number ruint32(buffer, endian, offset);
+Number[] ruint64(buffer, endian, offset);
 
 Read signed integers from a buffer:
 Number rsint8(buffer, endian, offset);
 Number rsint16(buffer, endian, offset);
 Number rsint32(buffer, endian, offset);
+Number[] rsint64(buffer, endian, offset);
 
 Read floating point numbers from a buffer:
 Number rfloat(buffer, endian, offset);   /* IEEE-754 Single precision */
 Number rdouble(buffer, endian, offset);  /* IEEE-754 Double precision */
 
 Write unsigned integers to a buffer:
-void wuint8(value, endian, buffer, offset);
-void wuint16(value, endian, buffer, offset);
-void wuint32(value, endian, buffer, offset);
+void wuint8(Number, endian, buffer, offset);
+void wuint16(Number, endian, buffer, offset);
+void wuint32(Number, endian, buffer, offset);
+void wuint64(Number[], endian, buffer, offset);
 
 Write signed integers from a buffer:
-void wsint8(buffer, endian, offset);
-void wsint16(buffer, endian, offset);
-void wsint32(buffer, endian, offset);
+void wsint8(Number, endian, buffer, offset);
+void wsint16(Number, endian, buffer, offset);
+void wsint32(Number, endian, buffer, offset);
+void wsint64(Number[], endian, buffer offset);
 
 Write floating point numbers from a buffer:
-void wfloat(buffer, endian, offset);   /* IEEE-754 Single precision */
-void wdouble(buffer, endian, offset);  /* IEEE-754 Double precision */
+void wfloat(Number, buffer, endian, offset);   /* IEEE-754 Single precision */
+void wdouble(Number, buffer, endian, offset);  /* IEEE-754 Double precision */
 
