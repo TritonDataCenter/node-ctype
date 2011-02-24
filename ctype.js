@@ -50,7 +50,7 @@ var deftypes = {
     'uint16_t': { read: ctReadUint16, write: ctWriteSint16 },
     'uint32_t': { read: ctReadUint32, write: ctWriteSint32 },
     'int8_t': { read: ctReadSint8, write: ctWriteSint8 },
-    'int16_t': { read: ctReadSint8, write: ctWriteSint16 },
+    'int16_t': { read: ctReadSint16, write: ctWriteSint16 },
     'int32_t': { read: ctReadSint32, write: ctWriteSint32 },
     'float': { read: ctReadFloat, write: ctWriteFloat },
     'double': { read: ctReadDouble, write: ctWriteDouble },

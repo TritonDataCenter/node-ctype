@@ -38,8 +38,8 @@ JSON objects that defines an order of keys which have types and values. One
 would build a struct to represent a point (x,y) as follows:
 
 [
-    { x: { type: int16_t }},
-    { y: { type: int16_t }}
+    { x: { type: 'int16_t' }},
+    { y: { type: 'int16_t' }}
 ]
 
 When this is passed into the read routine, it would read the first two bytes
@@ -56,8 +56,8 @@ When someone wants to write values, we use the same format as above, but with
 additional value field:
 
 [
-    { x: { type: int16_t, value: 42 }},
-    { y: { type: int16_t, value: -23 }}
+    { x: { type: 'int16_t', value: 42 }},
+    { y: { type: 'int16_t', value: -23 }}
 ]
 
 Now, the structure above may be optionally annotated with offsets. This tells
@@ -67,9 +67,9 @@ of lseek(offset, SEEK_SET). Thus, subsequent values will be read from that
 offset and incremented by the appropriate value. As an example:
 
 [
-    { x: { type: int16_t }},
-    { y: { type: int16_t, offset: 20 }},
-    { z: { type: int16_t }}
+    { x: { type: 'int16_t' }},
+    { y: { type: 'int16_t', offset: 20 }},
+    { z: { type: 'int16_t' }}
 ]
 
 We would read x from the first starting offset given to us, for the sake of
@@ -89,8 +89,8 @@ struct. Thus the following are all examples of a typedef:
 typedef('size_t', 'uint32_t');
 typedef('ssize_t', 'int32_t');
 typedef('point_t', [
-    { x: { type: int16_t }},
-    { y: { type: int16_t }}
+    { x: { type: 'int16_t' }},
+    { y: { type: 'int16_t' }}
 ]);
 
 Once something has been typedef'd it can be used in any of the definitions
@@ -105,9 +105,9 @@ is subject to change, but likely will look something like:
 {
     size_t: 'uint32_t',
     ssize_t: 'int32_t',
-    point_t: ]
-        { x: { type: int16_t }},
-        { y: { type: int16_t }}
+    point_t: [
+        { x: { type: 'int16_t' }},
+        { y: { type: 'int16_t' }}
     ]
 }
 
@@ -125,9 +125,9 @@ the key. This is only valid inside structs and the value must be declared
 before the value with the array. The following are examples:
 
 [
-    { ip_addr4: {type: 'uint8_t[4]'}},
-    { len: {type: 'uint32_t'}},
-    { data: { type: 'uint8_t[len]}'
+    { ip_addr4: { type: 'uint8_t[4]' }},
+    { len: { type: 'uint32_t' }},
+    { data: { type: 'uint8_t[len]' }}
 ]
 
 Arrays are permitted in typedefs; however, they must have a declared integer
