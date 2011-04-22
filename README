@@ -4,11 +4,13 @@ Node CType is a way to read and write binary data in structured and easy to use
 formats. It's name comes from the header file, though it does not share as much
 with it as it perhaps should.
 
-There are two levels of the API. One is the raw API which everthing is build on
-top of, the other provides a much nicer abstraction but is built entirely by
-using the lower level API. The hope is that the low level API is both clear and
-useful. The low level API gets it's names from stdint.h (a rather appropriate
-source). The lower level API is presented at the end of this document.
+There are two levels of the API. One is the raw API which everything is built on
+top of, while the other provides a much nicer abstraction and is built entirely
+by using the lower level API. The hope is that the low level API is both clear
+and useful. The low level API gets it's names from stdint.h (a rather
+appropriate source). The lower level API is presented at the end of this
+document.
+
 Standard CType API
 
 The CType interface is presented as a parser object that controls the
