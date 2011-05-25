@@ -1,0 +1,17 @@
+This contains tickets fixed in each version release in reverse chronological
+order. There is one ticket per line. Each commits message has the tickets fixed
+in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
+would be issue 42. Each issue can be found at:
+https://github.com/rmustacc/node-ctype/issues/%d.
+
+v0.0.2:
+CTYPE-8 dump npm version to v0.0.2
+CTYPE-9 want changelog
+CTYPE-7 fix typo in detypes.
+
+v0.0.1:
+CTYPE-5 Missing from NPM registry
+CTYPE-4 int16_t calls wrong read function
+CTYPE-3 API example types are missing quotes as strings
+CTYPE-2 doc missing 64-bit functions
+CTYPE-1 Need license

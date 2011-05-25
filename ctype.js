@@ -46,9 +46,9 @@ var ASSERT = require('assert');
  *
  */
 var deftypes = {
-    'uint8_t':  { read: ctReadUint8, write: ctWriteSint8 },
-    'uint16_t': { read: ctReadUint16, write: ctWriteSint16 },
-    'uint32_t': { read: ctReadUint32, write: ctWriteSint32 },
+    'uint8_t':  { read: ctReadUint8, write: ctWriteUint8 },
+    'uint16_t': { read: ctReadUint16, write: ctWriteUint16 },
+    'uint32_t': { read: ctReadUint32, write: ctWriteUint32 },
     'int8_t': { read: ctReadSint8, write: ctWriteSint8 },
     'int16_t': { read: ctReadSint16, write: ctWriteSint16 },
     'int32_t': { read: ctReadSint32, write: ctWriteSint32 },
