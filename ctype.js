@@ -193,7 +193,7 @@ function ctWriteChar(value, endian, buffer, offset)
 
 /*
  * We're going to write 0s into the buffer if the string is shorter than the
- * length of the array. 
+ * length of the array.
  */
 function ctWriteCharArray(value, length, endian, buffer, offset)
 {
