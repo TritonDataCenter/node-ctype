@@ -123,7 +123,7 @@ function test64()
 	var low = value - (high * Math.pow(2, 32));
 	ASSERT.equal(0x0007cda8, high);
 	ASSERT.equal(0xe7f90a6d, low);
-	
+
 	mod_ctype.wuint64([high, low], 'big', data, 0);
 	ASSERT.equal(0x00, data[0]);
 	ASSERT.equal(0x07, data[1]);
@@ -154,4 +154,3 @@ exports.test8 = test8;
 exports.test16 = test16;
 exports.test32 = test32;
 exports.test64 = test64;
-
