@@ -5,6 +5,7 @@ would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
 Unreleased:
+CTYPE-11 fix typo in wuint64
 CTYPE-10 Integrate jsstyle
 
 v0.0.2:
