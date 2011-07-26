@@ -739,6 +739,7 @@ CTypeParser.prototype.writeStruct = function (def, buffer, offset)
 		/* Now that we've written it out, we can use it for arrays */
 		vals[key] = entry['value'];
 	}
+    return offset - baseOffset;
 };
 
 /*
@@ -768,7 +769,7 @@ CTypeParser.prototype.writeData = function (def, buffer, offset)
 
 	ctCheckReq(def, this.types, [ 'value' ]);
 
-	this.writeStruct(def, buffer, offset);
+	return this.writeStruct(def, buffer, offset);
 };
 
 /*
