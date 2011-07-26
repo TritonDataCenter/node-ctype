@@ -494,9 +494,10 @@ function ctResolveArray(str, values)
 }
 
 /*
- * [private] Either the typedef resolves to another type string or to a struct.
- * If it resolves to a struct, we just pass it off to read struct. If not, we
- * can just pass it off to read entry.
+ * [private] Typedef resolves to another type string, base type definition or struct.
+ * If it resolves to a struct, we just pass it off to read struct.
+ * If it resolves to type definition - we use it's read/write functions.
+ * If it resolves to another type string we can just pass it off to read entry.
  */
 CTypeParser.prototype.resolveTypedef = function (type, dispatch, buffer,
     offset, value)
@@ -514,18 +515,23 @@ CTypeParser.prototype.resolveTypedef = function (type, dispatch, buffer,
 		else
 			throw (new Error('invalid dispatch type to ' +
 			    'resolveTypedef'));
-	} else {
-		if (dispatch == 'read')
-			return (this.readStruct(this.types[type], buffer,
-			    offset));
-		else if (dispatch == 'write')
-			return (this.readStruct(value, this.types[type],
-			    buffer, offset));
-		else
-			throw (new Error('invalid dispatch type to ' +
-			    'resolveTypedef'));
-	}
-
+	} else if ('read' in this.types[type] && 'write' in this.types[type]) {
+        if (dispatch == 'read') {
+            return this.types[type]['read'](this.endian, buffer, offset);
+        } else if (dispatch == 'write'){
+            return this.types[type]['write'](value, this.endian, buffer, offset);
+        }
+    } else {
+        if (dispatch == 'read')
+            return (this.readStruct(this.types[type], buffer,
+                offset));
+        else if (dispatch == 'write')
+            return (this.readStruct(value, this.types[type],
+                buffer, offset));
+        else
+            throw (new Error('invalid dispatch type to ' +
+                'resolveTypedef'));
+    }
 };
 
 /*
