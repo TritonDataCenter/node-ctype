@@ -423,10 +423,13 @@ CTypeParser.prototype.typedef = function (name, value)
 	if (name in this.types)
 		throw (new Error('typedef name already present: ' + name));
 
+	if ('read' in value && 'write' in value) {
+		this.types[name] = value;
+		return;
+	}
 	if (typeof (value) != 'string' && !(value instanceof Array))
 		throw (new Error('typedef value must either be a string or ' +
 		    'struct'));
-
 	if (typeof (value) == 'string') {
 		type = ctParseType(value);
 		if (type['len'] !== undefined) {
