@@ -504,7 +504,6 @@ CTypeParser.prototype.resolveTypedef = function (type, dispatch, buffer,
 	var pt;
 
 	ASSERT.ok(type in this.types);
-	console.log(type + ':' + this.types[type]);
 	if (typeof (this.types[type]) == 'string') {
 		pt = ctParseType(this.types[type]);
 		if (dispatch == 'read')
@@ -617,7 +616,7 @@ CTypeParser.prototype.readStruct = function (def, buffer, offset)
 		ret[key] = parse['value'];
 	}
 
-	return ({ values: ret, size: (offset-baseOffset)});
+	return ({ value: ret, size: (offset-baseOffset)});
 };
 
 /*
@@ -651,7 +650,7 @@ CTypeParser.prototype.readData = function (def, buffer, offset)
 	/* Sanity check the object definition */
 	ctCheckReq(def, this.types);
 
-	return (this.readStruct(def, buffer, offset)['values']);
+	return (this.readStruct(def, buffer, offset)['value']);
 };
 
 /*
