@@ -782,7 +782,7 @@ function toAbs64(val)
 	if (val === undefined)
 		throw (new Error('missing required arg: value'));
 
-	if (!(val instanceof Array))
+	if (!Array.isArray(val))
 		throw (new Error('value must be an array'));
 
 	if (val.length != 2)
@@ -808,7 +808,7 @@ function toApprox64(val)
 	if (val === undefined)
 		throw (new Error('missing required arg: value'));
 
-	if (!(val instanceof Array))
+	if (!Array.isArray(val))
 		throw (new Error('value must be an array'));
 
 	if (val.length != 2)
@@ -822,6 +822,8 @@ function toApprox64(val)
  * Parser and ctio.
  */
 exports.Parser = CTypeParser;
+exports.toAbs64 = toAbs64;
+exports.toApprox64 = toApprox64;
 
 exports.ruint8 = mod_ctio.ruint8;
 exports.ruint16 = mod_ctio.ruint16;
