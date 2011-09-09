@@ -4,6 +4,12 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.1.0:
+CTYPE-18 Bump version to v0.1.0
+CTYPE-17 Fix nested structures
+CTYPE-16 Remove extraneous logging
+CTYPE-14 toAbs64 and toApprox64 are not exported
+
 v0.0.3:
 CTYPE-12 Bump version to v0.0.3
 CTYPE-11 fix typo in wuint64
