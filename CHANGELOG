@@ -4,6 +4,12 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.2.0:
+CTYPE-23 Release v0.2.0
+CTYPE-21 Add support for CTF JSON data
+CTYPE-22 Add Javascriptlint profile
+CTYPE-15 Pull in ctio updates from node/master
+
 v0.1.0:
 CTYPE-18 Bump version to v0.1.0
 CTYPE-17 Fix nested structures
