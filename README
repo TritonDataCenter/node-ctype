@@ -100,10 +100,10 @@ previously shown.
 
 One cannot remove a typedef once created, this is analogous to C.
 
-The set of defined types can be printed with lsdef. The format of this output
+The set of defined types can be printed with lstypes. The format of this output
 is subject to change, but likely will look something like:
 
-> lsdef();
+> lstypes();
 {
     size_t: 'uint32_t',
     ssize_t: 'int32_t',
@@ -149,6 +149,14 @@ original by the following formula:
 
 value[0] << 32 + value[1] (Note this will not work in Javascript)
 
+CTF JSON data:
+
+node-ctype can also handle JSON data that mathces the format described in the
+documentation of the tool ctf2json. Given the JSON data which specifies type
+information, it will transform that into a parser that understands all of the
+types defined inside of it. This is useful for more complicated structures that
+have a lot of typedefs.
+
 Interface overview
 
 The following is the header-file like interface to the parser object:
@@ -162,6 +170,18 @@ The following is the header-file like interface to the parser object:
  *
  */
 function CTypeParser(conf);
+
+/*
+ * Parses the CTF JSON data and creates a parser that understands all of those
+ * types.
+ *
+ *	data		Parsed JSON data that maches that CTF JSON
+ *			specification.
+ *
+ *	conf		The configuration object to create a new CTypeParser
+ *			from.
+ */
+CTypeParser parseCTF(data, conf);
 
 /*
  * This is what we were born to do. We read the data from a buffer and return it
@@ -202,7 +222,7 @@ void CTypeParser.writeData(<Type Definition>, buffer, offset);
  */
 void CTypeParser.prototype.typedef(name, value);
 
-Object CTypeParser.prototype.lsdef();
+Object CTypeParser.prototype.lstypes();
 
 /*
  * Get the endian value for the current parser

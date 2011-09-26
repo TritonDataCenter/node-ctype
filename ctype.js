@@ -34,6 +34,7 @@
  *
  */
 
+var mod_ctf = require('./ctf.js');
 var mod_ctio = require('./ctio.js');
 var ASSERT = require('assert');
 
@@ -279,7 +280,7 @@ function ctParseType(str)
 function ctCheckReq(def, types, fields)
 {
 	var ii, jj;
-	var req, keys, key, exists;
+	var req, keys, key;
 	var found = {};
 
 	if (!(def instanceof Array))
@@ -316,7 +317,6 @@ function ctCheckReq(def, types, fields)
 		 */
 		while (key['len'] !== undefined) {
 			if (isNaN(parseInt(key['len'], 10))) {
-				exists = false;
 				if (!(key['len'] in found))
 					throw (new Error('Given an array ' +
 					    'length without a matching type'));
@@ -817,6 +817,14 @@ function toApprox64(val)
 	return (Math.pow(2, 32) * val[0] + val[1]);
 }
 
+function parseCTF(json, conf)
+{
+	var ctype = new CTypeParser(conf);
+	mod_ctf.ctfParseJson(json, ctype);
+
+	return (ctype);
+}
+
 /*
  * Export the few things we actually want to. Currently this is just the CType
  * Parser and ctio.
@@ -824,6 +832,8 @@ function toApprox64(val)
 exports.Parser = CTypeParser;
 exports.toAbs64 = toAbs64;
 exports.toApprox64 = toApprox64;
+
+exports.parseCTF = parseCTF;
 
 exports.ruint8 = mod_ctio.ruint8;
 exports.ruint16 = mod_ctio.ruint16;

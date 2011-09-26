@@ -64,10 +64,24 @@ function ruint8(buffer, endian, offset)
 /*
  * For 16 bit unsigned numbers we can do all the casting that we want to do.
  */
-function ruint16(buffer, endian, offset)
+function rgint16(buffer, endian, offset)
 {
 	var val = 0;
 
+	if (endian == 'big') {
+		val = buffer[offset] << 8;
+		val |=  buffer[offset+1];
+	} else {
+		val = buffer[offset];
+		val |= buffer[offset+1] << 8;
+	}
+
+	return (val);
+
+}
+
+function ruint16(buffer, endian, offset)
+{
 	if (endian === undefined)
 		throw (new Error('missing endian'));
 
@@ -80,15 +94,7 @@ function ruint16(buffer, endian, offset)
 	if (offset + 1 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	if (endian == 'big') {
-		val = buffer[offset] << 8;
-		val |=  buffer[offset+1];
-	} else {
-		val = buffer[offset];
-		val |= buffer[offset+1] << 8;
-	}
-
-	return (val);
+	return (rgint16(buffer, endian, offset));
 }
 
 /*
@@ -102,19 +108,27 @@ function ruint16(buffer, endian, offset)
  * multiplication by (1 << 24) which does the same thing, but in a way that
  * ensures we don't lose that bit.
  */
-
-/*
- * Handle the case of losing our MSBit
- */
-function fixu32(upper, lower)
+function rgint32(buffer, endian, offset)
 {
-	return ((upper * (1 << 24)) + lower);
+	var val = 0;
+
+	if (endian == 'big') {
+		val = buffer[offset+1] << 16;
+		val |= buffer[offset+2] << 8;
+		val |= buffer[offset+3];
+		val = val + (buffer[offset] << 24 >>> 0);
+	} else {
+		val = buffer[offset+2] << 16;
+		val |= buffer[offset+1] << 8;
+		val |= buffer[offset];
+		val = val + (buffer[offset + 3] << 24 >>> 0);
+	}
+
+	return (val);
 }
 
 function ruint32(buffer, endian, offset)
 {
-	var val = 0;
-
 	if (endian === undefined)
 		throw (new Error('missing endian'));
 
@@ -127,19 +141,7 @@ function ruint32(buffer, endian, offset)
 	if (offset + 3 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	if (endian == 'big') {
-		val = buffer[offset+1] << 16;
-		val |= buffer[offset+2] << 8;
-		val |= buffer[offset+3];
-		val = fixu32(buffer[offset], val);
-	} else {
-		val = buffer[offset+2] << 16;
-		val |= buffer[offset+1] << 8;
-		val |= buffer[offset];
-		val = fixu32(buffer[offset+3], val);
-	}
-
-	return (val);
+	return (rgint32(buffer, endian, offset));
 }
 
 /*
@@ -158,10 +160,23 @@ function ruint32(buffer, endian, offset)
  * produce the desired results because of the way Javascript numbers are
  * doubles.
  */
-function ruint64(buffer, endian, offset)
+function rgint64(buffer, endian, offset)
 {
 	var val = new Array(2);
 
+	if (endian == 'big') {
+		val[0] = ruint32(buffer, endian, offset);
+		val[1] = ruint32(buffer, endian, offset+4);
+	} else {
+		val[0] = ruint32(buffer, endian, offset+4);
+		val[1] = ruint32(buffer, endian, offset);
+	}
+
+	return (val);
+}
+
+function ruint64(buffer, endian, offset)
+{
 	if (endian === undefined)
 		throw (new Error('missing endian'));
 
@@ -174,15 +189,7 @@ function ruint64(buffer, endian, offset)
 	if (offset + 7 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	if (endian == 'big') {
-		val[0] = ruint32(buffer, endian, offset);
-		val[1] = ruint32(buffer, endian, offset+4);
-	} else {
-		val[0] = ruint32(buffer, endian, offset+4);
-		val[1] = ruint32(buffer, endian, offset);
-	}
-
-	return (val);
+	return (rgint64(buffer, endian, offset));
 }
 
 
@@ -284,7 +291,7 @@ function rsint16(buffer, endian, offset)
 	if (offset + 1 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	val = ruint16(buffer, endian, offset);
+	val = rgint16(buffer, endian, offset);
 	neg = val & 0x8000;
 	if (!neg)
 		return (val);
@@ -316,7 +323,7 @@ function rsint32(buffer, endian, offset)
 	if (offset + 3 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	val = ruint32(buffer, endian, offset);
+	val = rgint32(buffer, endian, offset);
 	neg = val & 0x80000000;
 	if (!neg)
 		return (val);
@@ -344,7 +351,7 @@ function rsint64(buffer, endian, offset)
 	if (offset + 3 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	val = ruint64(buffer, endian, offset);
+	val = rgint64(buffer, endian, offset);
 	neg = val[0] & 0x80000000;
 
 	if (!neg)
@@ -697,6 +704,17 @@ function wuint8(value, endian, buffer, offset)
  * Pretty much the same as the 8-bit version, just this time we need to worry
  * about endian related issues.
  */
+function wgint16(val, endian, buffer, offset)
+{
+	if (endian == 'big') {
+		buffer[offset] = (val & 0xff00) >>> 8;
+		buffer[offset+1] = val & 0x00ff;
+	} else {
+		buffer[offset+1] = (val & 0xff00) >>> 8;
+		buffer[offset] = val & 0x00ff;
+	}
+}
+
 function wuint16(value, endian, buffer, offset)
 {
 	var val;
@@ -717,13 +735,7 @@ function wuint16(value, endian, buffer, offset)
 		throw (new Error('Trying to read beyond buffer length'));
 
 	val = prepuint(value, 0xffff);
-	if (endian == 'big') {
-		buffer[offset] = (val & 0xff00) >>> 8;
-		buffer[offset+1] = val & 0x00ff;
-	} else {
-		buffer[offset+1] = (val & 0xff00) >>> 8;
-		buffer[offset] = val & 0x00ff;
-	}
+	wgint16(val, endian, buffer, offset);
 }
 
 /*
@@ -737,6 +749,22 @@ function wuint16(value, endian, buffer, offset)
  * value we'd have to truncate it intelligently, this saves us that problem and
  * may even be somewhat faster under the hood.
  */
+function wgint32(val, endian, buffer, offset)
+{
+	if (endian == 'big') {
+		buffer[offset] = (val - (val & 0x00ffffff)) / Math.pow(2, 24);
+		buffer[offset+1] = (val >>> 16) & 0xff;
+		buffer[offset+2] = (val >>> 8) & 0xff;
+		buffer[offset+3] = val & 0xff;
+	} else {
+		buffer[offset+3] = (val - (val & 0x00ffffff)) /
+		    Math.pow(2, 24);
+		buffer[offset+2] = (val >>> 16) & 0xff;
+		buffer[offset+1] = (val >>> 8) & 0xff;
+		buffer[offset] = val & 0xff;
+	}
+}
+
 function wuint32(value, endian, buffer, offset)
 {
 	var val;
@@ -757,18 +785,7 @@ function wuint32(value, endian, buffer, offset)
 		throw (new Error('Trying to read beyond buffer length'));
 
 	val = prepuint(value, 0xffffffff);
-	if (endian == 'big') {
-		buffer[offset] = (val - (val & 0x00ffffff)) / Math.pow(2, 24);
-		buffer[offset+1] = (val >>> 16) & 0xff;
-		buffer[offset+2] = (val >>> 8) & 0xff;
-		buffer[offset+3] = val & 0xff;
-	} else {
-		buffer[offset+3] = (val - (val & 0x00ffffff)) /
-		    Math.pow(2, 24);
-		buffer[offset+2] = (val >>> 16) & 0xff;
-		buffer[offset+1] = (val >>> 8) & 0xff;
-		buffer[offset] = val & 0xff;
-	}
+	wgint32(val, endian, buffer, offset);
 }
 
 /*
@@ -776,6 +793,17 @@ function wuint32(value, endian, buffer, offset)
  * arrays where value[0] << 32 + value[1] would result in the value that we
  * want.
  */
+function wgint64(value, endian, buffer, offset)
+{
+	if (endian == 'big') {
+		wgint32(value[0], endian, buffer, offset);
+		wgint32(value[1], endian, buffer, offset+4);
+	} else {
+		wgint32(value[0], endian, buffer, offset+4);
+		wgint32(value[1], endian, buffer, offset);
+	}
+}
+
 function wuint64(value, endian, buffer, offset)
 {
 	if (value === undefined)
@@ -801,14 +829,7 @@ function wuint64(value, endian, buffer, offset)
 
 	prepuint(value[0], 0xffffffff);
 	prepuint(value[1], 0xffffffff);
-
-	if (endian == 'big') {
-		wuint32(value[0], endian, buffer, offset);
-		wuint32(value[1], endian, buffer, offset+4);
-	} else {
-		wuint32(value[0], endian, buffer, offset+4);
-		wuint32(value[1], endian, buffer, offset);
-	}
+	wgint64(value, endian, buffer, offset);
 }
 
 /*
@@ -929,9 +950,9 @@ function wsint16(value, endian, buffer, offset)
 
 	val = prepsint(value, 0x7fff, -0xf000);
 	if (val >= 0)
-		wuint16(val, endian, buffer, offset);
+		wgint16(val, endian, buffer, offset);
 	else
-		wuint16(0xffff + val + 1, endian, buffer, offset);
+		wgint16(0xffff + val + 1, endian, buffer, offset);
 
 }
 
@@ -960,9 +981,9 @@ function wsint32(value, endian, buffer, offset)
 
 	val = prepsint(value, 0x7fffffff, -0xf0000000);
 	if (val >= 0)
-		wuint32(val, endian, buffer, offset);
+		wgint32(val, endian, buffer, offset);
 	else
-		wuint32(0xffffffff + val + 1, endian, buffer, offset);
+		wgint32(0xffffffff + val + 1, endian, buffer, offset);
 }
 
 /*
@@ -1010,14 +1031,7 @@ function wsint64(value, endian, buffer, offset)
 		vals[0] = value[0];
 		vals[1] = value[1];
 	}
-
-	if (endian == 'big') {
-		wuint32(vals[0], endian, buffer, offset);
-		wuint32(vals[1], endian, buffer, offset+4);
-	} else {
-		wuint32(vals[0], endian, buffer, offset+4);
-		wuint32(vals[1], endian, buffer, offset);
-	}
+	wgint64(vals, endian, buffer, offset);
 }
 
 /*
