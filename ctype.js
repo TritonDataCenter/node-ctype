@@ -518,7 +518,7 @@ CTypeParser.prototype.resolveTypedef = function (type, dispatch, buffer,
 			return (this.readStruct(this.types[type], buffer,
 			    offset));
 		else if (dispatch == 'write')
-			return (this.readStruct(value, this.types[type],
+			return (this.writeStruct(value, this.types[type],
 			    buffer, offset));
 		else
 			throw (new Error('invalid dispatch type to ' +
@@ -693,7 +693,7 @@ CTypeParser.prototype.writeEntry = function (value, type, buffer, offset)
 			    this.endian, buffer, offset);
 		else
 			ret = this.writeArray(value, type['type'],
-			    len, buffer, offset);
+			    buffer, offset);
 	} else {
 		if (type['type'] in deftypes)
 			ret = deftypes[type['type']]['write'](value,
@@ -709,7 +709,7 @@ CTypeParser.prototype.writeEntry = function (value, type, buffer, offset)
 /*
  * [private] Write a single struct out.
  */
-CTypeParser.prototype.writeStruct = function (def, buffer, offset)
+CTypeParser.prototype.writeStruct = function (value, def, buffer, offset)
 {
 	var ii, entry, type, key;
 	var baseOffset = offset;
@@ -724,9 +724,9 @@ CTypeParser.prototype.writeStruct = function (def, buffer, offset)
 		if ('offset' in entry)
 			offset = baseOffset + entry['offset'];
 
-		offset += this.writeEntry(entry['value'], type, buffer, offset);
+		offset += this.writeEntry(value[ii], type, buffer, offset);
 
-		/* Now that we've written it out, we can use it for arrays */
+		/* Keep track of types for array length resolution */
 		vals[key] = entry['value'];
 	}
 };
@@ -741,9 +741,13 @@ CTypeParser.prototype.writeStruct = function (def, buffer, offset)
  *	buffer		The buffer to write to
  *
  *	offset		The offset in the buffer to write to
+ *
+ * TODO This endpoint really is just awful. See ticket CTYPE-6
  */
 CTypeParser.prototype.writeData = function (def, buffer, offset)
 {
+	var ii, vals, key;
+
 	if (def === undefined)
 		throw (new Error('missing definition for what we should be' +
 		    'parsing'));
@@ -757,8 +761,12 @@ CTypeParser.prototype.writeData = function (def, buffer, offset)
 		    'parsing'));
 
 	ctCheckReq(def, this.types, [ 'value' ]);
-
-	this.writeStruct(def, buffer, offset);
+	vals = [];
+	for (ii = 0; ii < def.length; ii++) {
+		key = Object.keys(def[ii])[0];
+		vals.push(def[ii][key]['value']);
+	}
+	this.writeStruct(vals, def, buffer, offset);
 };
 
 /*
