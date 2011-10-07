@@ -217,9 +217,8 @@ function ctWriteCharArray(value, length, endian, buffer, offset)
 }
 
 /*
- * Construct a per parser specific set of the basic types. That way if this is
- * modified, it's okay. The values themselves should never be modified; however,
- * the set of keys may change over time.
+ * Each parser has their own set of types. We want to make sure that they each
+ * get their own copy as they may need to modify it.
  */
 function ctGetBasicTypes()
 {
@@ -347,16 +346,22 @@ function ctCheckReq(def, types, fields)
 
 /*
  * Create a new instance of the parser. Each parser has its own store of
- * typedefs and endianness. Conf is an object with the following values:
+ * typedefs and endianness. Conf is an object with the following required
+ * values:
  *
  *	endian		Either 'big' or 'little' do determine the endianness we
  *			want to read from or write to.
  *
+ * And the following optional values:
+ *
+ * 	char-type	Valid options here are uint8 and int8. If uint8 is
+ * 			specified this changes the default behavior of a single
+ * 			char from being a buffer of a single character to being
+ * 			a uint8_t. If int8, it becomes an int8_t instead.
  */
 function CTypeParser(conf)
 {
-	if (!conf)
-		throw (new Error('missing required argument'));
+	if (!conf) throw (new Error('missing required argument'));
 
 	if (!('endian' in conf))
 		throw (new Error('missing required endian value'));
@@ -364,8 +369,23 @@ function CTypeParser(conf)
 	if (conf['endian'] != 'big' && conf['endian'] != 'little')
 		throw (new Error('Invalid endian type'));
 
+	if ('char-type' in conf && (conf['char-type'] != 'uint8' &&
+	    conf['char-type'] != 'int8'))
+		throw (new Error('invalid option for char-type: ' +
+		    conf['char-type']));
+
 	this.endian = conf['endian'];
 	this.types = ctGetBasicTypes();
+
+	/*
+	 * This may be a more graceful way to do this, but this will have to
+	 * serve.
+	 */
+	if ('char-type' in conf && conf['char-type'] == 'uint8')
+		this.types['char'] = this.types['uint8_t'];
+
+	if ('char-type' in conf && conf['char-type'] == 'int8')
+		this.types['char'] = this.types['int8_t'];
 }
 
 /*
@@ -518,7 +538,7 @@ CTypeParser.prototype.resolveTypedef = function (type, dispatch, buffer,
 			return (this.readStruct(this.types[type], buffer,
 			    offset));
 		else if (dispatch == 'write')
-			return (this.writeStruct(value, this.types[type],
+			return (this.readStruct(value, this.types[type],
 			    buffer, offset));
 		else
 			throw (new Error('invalid dispatch type to ' +
@@ -554,14 +574,14 @@ CTypeParser.prototype.readEntry = function (type, buffer, offset)
 			throw (new Error('somehow got a non-numeric length'));
 
 		if (type['type'] == 'char')
-			parse = deftypes['char[]']['read'](len,
+			parse = this.types['char[]']['read'](len,
 			    this.endian, buffer, offset);
 		else
 			parse = this.readArray(type['type'],
 			    len, buffer, offset);
 	} else {
 		if (type['type'] in deftypes)
-			parse = deftypes[type['type']]['read'](this.endian,
+			parse = this.types[type['type']]['read'](this.endian,
 			    buffer, offset);
 		else
 			parse = this.resolveTypedef(type['type'], 'read',
@@ -640,11 +660,11 @@ CTypeParser.prototype.readData = function (def, buffer, offset)
 		    'parsing'));
 
 	if (buffer === undefined)
-		throw (new Error('missing buffer for what we should be' +
+		throw (new Error('missing buffer for what we should be ' +
 		    'parsing'));
 
 	if (offset === undefined)
-		throw (new Error('missing offset for what we should be' +
+		throw (new Error('missing offset for what we should be ' +
 		    'parsing'));
 
 	/* Sanity check the object definition */
@@ -689,14 +709,14 @@ CTypeParser.prototype.writeEntry = function (value, type, buffer, offset)
 			throw (new Error('somehow got a non-numeric length'));
 
 		if (type['type'] == 'char')
-			ret = deftypes['char[]']['write'](value, len,
+			ret = this.types['char[]']['write'](value, len,
 			    this.endian, buffer, offset);
 		else
 			ret = this.writeArray(value, type['type'],
-			    buffer, offset);
+			    len, buffer, offset);
 	} else {
 		if (type['type'] in deftypes)
-			ret = deftypes[type['type']]['write'](value,
+			ret = this.types[type['type']]['write'](value,
 			    this.endian, buffer, offset);
 		else
 			ret = this.resolveTypedef(type['type'], 'write',
@@ -709,7 +729,7 @@ CTypeParser.prototype.writeEntry = function (value, type, buffer, offset)
 /*
  * [private] Write a single struct out.
  */
-CTypeParser.prototype.writeStruct = function (value, def, buffer, offset)
+CTypeParser.prototype.writeStruct = function (def, buffer, offset)
 {
 	var ii, entry, type, key;
 	var baseOffset = offset;
@@ -724,9 +744,9 @@ CTypeParser.prototype.writeStruct = function (value, def, buffer, offset)
 		if ('offset' in entry)
 			offset = baseOffset + entry['offset'];
 
-		offset += this.writeEntry(value[ii], type, buffer, offset);
+		offset += this.writeEntry(entry['value'], type, buffer, offset);
 
-		/* Keep track of types for array length resolution */
+		/* Now that we've written it out, we can use it for arrays */
 		vals[key] = entry['value'];
 	}
 };
@@ -741,32 +761,24 @@ CTypeParser.prototype.writeStruct = function (value, def, buffer, offset)
  *	buffer		The buffer to write to
  *
  *	offset		The offset in the buffer to write to
- *
- * TODO This endpoint really is just awful. See ticket CTYPE-6
  */
 CTypeParser.prototype.writeData = function (def, buffer, offset)
 {
-	var ii, vals, key;
-
 	if (def === undefined)
 		throw (new Error('missing definition for what we should be' +
 		    'parsing'));
 
 	if (buffer === undefined)
-		throw (new Error('missing buffer for what we should be' +
+		throw (new Error('missing buffer for what we should be ' +
 		    'parsing'));
 
 	if (offset === undefined)
-		throw (new Error('missing offset for what we should be' +
+		throw (new Error('missing offset for what we should be ' +
 		    'parsing'));
 
 	ctCheckReq(def, this.types, [ 'value' ]);
-	vals = [];
-	for (ii = 0; ii < def.length; ii++) {
-		key = Object.keys(def[ii])[0];
-		vals.push(def[ii][key]['value']);
-	}
-	this.writeStruct(vals, def, buffer, offset);
+
+	this.writeStruct(def, buffer, offset);
 };
 
 /*
