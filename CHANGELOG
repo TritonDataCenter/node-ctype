@@ -4,6 +4,10 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.3.1
+CTYPE-29 Release 0.3.1
+CTYPE-28 Want v0.6 npm support
+
 v0.3.0
 CTYPE-27 Release v0.3.0
 CTYPE-26 Want alternate default char behavior
