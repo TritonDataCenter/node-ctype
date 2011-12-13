@@ -8,7 +8,7 @@ function test()
 
 	data = JSON.parse(mod_fs.readFileSync('./int.json').toString());
 	parser = mod_ctype.parseCTF(data, { endian: 'big' });
-	mod_assert.deepEqual(parser.lstypes(), { 'int': 'uint32_t' });
+	mod_assert.deepEqual(parser.lstypes(), { 'int': 'int32_t' });
 }
 
 test();

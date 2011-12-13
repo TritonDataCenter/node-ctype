@@ -40,6 +40,7 @@
  * Big Endian: MSB -> First byte
  * Little Endian: MSB->Last byte
  */
+var mod_assert = require('assert');
 
 /*
  * An 8 bit unsigned integer involves doing no significant work.
@@ -104,9 +105,12 @@ function ruint16(buffer, endian, offset)
  * > 200 << 24
  * -939524096
  *
- * Not the value you'd expect. To work around this, we instead do a
- * multiplication by (1 << 24) which does the same thing, but in a way that
- * ensures we don't lose that bit.
+ * Not the value you'd expect. To work around this, we end up having to do some
+ * abuse of the JavaScript standard. in this case, we know that a >>> shift is
+ * defined to cast our value to an *unsigned* 32-bit number. Because of that, we
+ * use that instead to save us some additional math, though it does feel a
+ * little weird and it isn't obvious as to why you woul dwant to do this at
+ * first.
  */
 function rgint32(buffer, endian, offset)
 {
@@ -359,6 +363,20 @@ function rsint64(buffer, endian, offset)
 
 	val[0] = (0xffffffff - val[0]) * -1;
 	val[1] = (0xffffffff - val[1] + 1) * -1;
+
+	/*
+	 * If we had the key 0x8000000000000000, that would leave the lower 32
+	 * bits as 0xffffffff, however, since we're goint to add one, that would
+	 * actually leave the lower 32-bits as 0x100000000, which would break
+	 * our ability to write back a value that we received. To work around
+	 * this, if we actually get that value, we're going to bump the upper
+	 * portion by 1 and set this to zero.
+	 */
+	mod_assert.ok(val[1] <= 0x100000000);
+	if (val[1] == -0x100000000) {
+		val[1] = 0;
+		val[0]--;
+	}
 
 	return (val);
 }
@@ -919,7 +937,7 @@ function wsint8(value, endian, buffer, offset)
 	if (offset >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	val = prepsint(value, 0x7f, -0xf0);
+	val = prepsint(value, 0x7f, -0x80);
 	if (val >= 0)
 		wuint8(val, endian, buffer, offset);
 	else
@@ -948,7 +966,7 @@ function wsint16(value, endian, buffer, offset)
 	if (offset + 1 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	val = prepsint(value, 0x7fff, -0xf000);
+	val = prepsint(value, 0x7fff, -0x8000);
 	if (val >= 0)
 		wgint16(val, endian, buffer, offset);
 	else
@@ -979,7 +997,7 @@ function wsint32(value, endian, buffer, offset)
 	if (offset + 3 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	val = prepsint(value, 0x7fffffff, -0xf0000000);
+	val = prepsint(value, 0x7fffffff, -0x80000000);
 	if (val >= 0)
 		wgint32(val, endian, buffer, offset);
 	else
@@ -989,10 +1007,12 @@ function wsint32(value, endian, buffer, offset)
 /*
  * The signed 64 bit integer should by in the same format as when received.
  * Mainly it should ensure that the value is an array of two integers where
- * value[0] << 32 + value[1] is the desired number.
+ * value[0] << 32 + value[1] is the desired number. Furthermore, the two values
+ * need to be equal.
  */
 function wsint64(value, endian, buffer, offset)
 {
+	var vzpos, vopos;
 	var vals = new Array(2);
 
 	if (value === undefined)
@@ -1016,8 +1036,50 @@ function wsint64(value, endian, buffer, offset)
 	if (offset + 7 >= buffer.length)
 		throw (new Error('Trying to read beyond buffer length'));
 
-	prepsint(value[0], 0x7fffffff, -0xf0000000);
-	prepsint(value[1], 0xffffffff, -0xffffffff);
+	/*
+	 * We need to make sure that we have the same sign on both values. The
+	 * hokiest way to to do this is to multiply the number by +inf. If we do
+	 * this, we'll get either +/-inf depending on the sign of the value.
+	 * Once we have this, we can compare it to +inf to see if the number is
+	 * positive or not.
+	 */
+	vzpos = (value[0] * Number.POSITIVE_INFINITY) ==
+	    Number.POSITIVE_INFINITY;
+	vopos = (value[1] * Number.POSITIVE_INFINITY) ==
+	    Number.POSITIVE_INFINITY;
+
+	/*
+	 * If either of these is zero, then we don't actually need this check.
+	 */
+	if (value[0] != 0 && value[1] != 0 && vzpos != vopos)
+		throw (new Error('Both entries in the array must have ' +
+		    'the same sign'));
+
+	/*
+	 * Doing verification for a signed 64-bit integer is actually a big
+	 * trickier than it appears. We can't quite use our standard techniques
+	 * because we need to compare both sets of values. The first value is
+	 * pretty straightforward. If the first value is beond the extremes than
+	 * we error out. However, the valid range of the second value varies
+	 * based on the first one. If the first value is negative, and *not* the
+	 * largest negative value, than it can be any integer within the range [
+	 * 0, 0xffffffff ]. If it is the largest negative number, it must be
+	 * zero.
+	 *
+	 * If the first number is positive, than it doesn't matter what the
+	 * value is. We just simply have to make sure we have a valid positive
+	 * integer.
+	 */
+	if (vzpos) {
+		prepuint(value[0], 0x7fffffff);
+		prepuint(value[1], 0xffffffff);
+	} else {
+		prepsint(value[0], 0, -0x80000000);
+		prepsint(value[1], 0, -0xffffffff);
+		if (value[0] == -0x80000000 && value[1] != 0)
+			throw (new Error('value smaller than minimum ' +
+			    'allowed value'));
+	}
 
 	/* Fix negative numbers */
 	if (value[0] < 0 || value[1] < 0) {

@@ -35,24 +35,21 @@ function ctfParseInteger(entry, ctype)
 	type = null;
 
 	if (sign && len == 1)
-		type = 'uint8_t';
-	else if (len == 1)
 		type = 'int8_t';
+	else if (len == 1)
+		type = 'uint8_t';
 	else if (sign && len == 2)
-		type = 'uint16_t';
-	else if (len == 2)
 		type = 'int16_t';
+	else if (len == 2)
+		type = 'uint16_t';
 	else if (sign && len == 4)
-		type = 'uint32_t';
-	else if (len == 4)
 		type = 'int32_t';
-/*
- * 	TODO: Add this back in once the parser supports 64-bit values
- *	else if (sign && len == 8)
- *		type = 'uint64_t';
- *	else if (len == 8)
- *		type = 'int64_t';
- */
+	else if (len == 4)
+		type = 'uint32_t';
+	else if (sign && len == 8)
+		type = 'int64_t';
+	else if (len == 8)
+		type = 'uint64_t';
 
 	if (type === null)
 		throw (new Error('Malformed CTF JSON: integer has ' +
@@ -67,7 +64,7 @@ function ctfParseInteger(entry, ctype)
 		return;
 
 	if (name == 'char') {
-		ASSERT(type == 'uint8_t');
+		ASSERT(type == 'int8_t');
 		return;
 	}
 

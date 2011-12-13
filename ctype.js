@@ -13,6 +13,7 @@
  *	uint8_t
  *	uint16_t
  *	uint32_t
+ *	uint64_t
  *	float
  *	double
  *	char
@@ -36,7 +37,7 @@
 
 var mod_ctf = require('./ctf.js');
 var mod_ctio = require('./ctio.js');
-var ASSERT = require('assert');
+var mod_assert = require('assert');
 
 /*
  * This is the set of basic types that we support.
@@ -50,9 +51,11 @@ var deftypes = {
     'uint8_t':  { read: ctReadUint8, write: ctWriteUint8 },
     'uint16_t': { read: ctReadUint16, write: ctWriteUint16 },
     'uint32_t': { read: ctReadUint32, write: ctWriteUint32 },
+    'uint64_t': { read: ctReadUint64, write: ctWriteUint64 },
     'int8_t': { read: ctReadSint8, write: ctWriteSint8 },
     'int16_t': { read: ctReadSint16, write: ctWriteSint16 },
     'int32_t': { read: ctReadSint32, write: ctWriteSint32 },
+    'int64_t': { read: ctReadSint64, write: ctWriteSint64 },
     'float': { read: ctReadFloat, write: ctWriteFloat },
     'double': { read: ctReadDouble, write: ctWriteDouble },
     'char': { read: ctReadChar, write: ctWriteChar },
@@ -81,6 +84,12 @@ function ctReadUint32(endian, buffer, offset)
 	return ({ value: val, size: 4 });
 }
 
+function ctReadUint64(endian, buffer, offset)
+{
+	var val = mod_ctio.ruint64(buffer, endian, offset);
+	return ({ value: val, size: 8 });
+}
+
 function ctReadSint8(endian, buffer, offset)
 {
 	var val = mod_ctio.rsint8(buffer, endian, offset);
@@ -96,6 +105,12 @@ function ctReadSint16(endian, buffer, offset)
 function ctReadSint32(endian, buffer, offset)
 {
 	var val = mod_ctio.rsint32(buffer, endian, offset);
+	return ({ value: val, size: 4 });
+}
+
+function ctReadSint64(endian, buffer, offset)
+{
+	var val = mod_ctio.rsint64(buffer, endian, offset);
 	return ({ value: val, size: 4 });
 }
 
@@ -150,6 +165,12 @@ function ctWriteUint32(value, endian, buffer, offset)
 	return (4);
 }
 
+function ctWriteUint64(value, endian, buffer, offset)
+{
+	mod_ctio.wuint64(value, endian, buffer, offset);
+	return (8);
+}
+
 function ctWriteSint8(value, endian, buffer, offset)
 {
 	mod_ctio.wsint8(value, endian, buffer, offset);
@@ -166,6 +187,12 @@ function ctWriteSint32(value, endian, buffer, offset)
 {
 	mod_ctio.wsint32(value, endian, buffer, offset);
 	return (4);
+}
+
+function ctWriteSint64(value, endian, buffer, offset)
+{
+	mod_ctio.wsint64(value, endian, buffer, offset);
+	return (8);
 }
 
 function ctWriteFloat(value, endian, buffer, offset)
@@ -378,7 +405,7 @@ function CTypeParser(conf)
 	this.types = ctGetBasicTypes();
 
 	/*
-	 * This may be a more graceful way to do this, but this will have to
+	 * There may be a more graceful way to do this, but this will have to
 	 * serve.
 	 */
 	if ('char-type' in conf && conf['char-type'] == 'uint8')
@@ -523,7 +550,7 @@ CTypeParser.prototype.resolveTypedef = function (type, dispatch, buffer,
 {
 	var pt;
 
-	ASSERT.ok(type in this.types);
+	mod_assert.ok(type in this.types);
 	if (typeof (this.types[type]) == 'string') {
 		pt = ctParseType(this.types[type]);
 		if (dispatch == 'read')
@@ -538,7 +565,7 @@ CTypeParser.prototype.resolveTypedef = function (type, dispatch, buffer,
 			return (this.readStruct(this.types[type], buffer,
 			    offset));
 		else if (dispatch == 'write')
-			return (this.readStruct(value, this.types[type],
+			return (this.writeStruct(value, this.types[type],
 			    buffer, offset));
 		else
 			throw (new Error('invalid dispatch type to ' +
@@ -729,7 +756,7 @@ CTypeParser.prototype.writeEntry = function (value, type, buffer, offset)
 /*
  * [private] Write a single struct out.
  */
-CTypeParser.prototype.writeStruct = function (def, buffer, offset)
+CTypeParser.prototype.writeStruct = function (value, def, buffer, offset)
 {
 	var ii, entry, type, key;
 	var baseOffset = offset;
@@ -744,16 +771,41 @@ CTypeParser.prototype.writeStruct = function (def, buffer, offset)
 		if ('offset' in entry)
 			offset = baseOffset + entry['offset'];
 
-		offset += this.writeEntry(entry['value'], type, buffer, offset);
-
+		offset += this.writeEntry(value[ii], type, buffer, offset);
 		/* Now that we've written it out, we can use it for arrays */
-		vals[key] = entry['value'];
+		vals[key] = value[ii];
 	}
 };
 
 /*
+ * Unfortunately, we're stuck with the sins of an initial poor design. Because
+ * of that, we are going to have to support the old way of writing data via
+ * writeData. There we insert the values that you want to write into the
+ * definition. A little baroque. Internally, we use the new model. So we need to
+ * just get those values out of there. But to maintain the principle of least
+ * surprise, we're not going to modify the input data.
+ */
+function getValues(def)
+{
+	var ii, out, key;
+	out = [];
+	for (ii = 0; ii < def.length; ii++) {
+		key = Object.keys(def[ii])[0];
+		mod_assert.ok('value' in def[ii][key]);
+		out.push(def[ii][key]['value']);
+	}
+
+	return (out);
+}
+
+/*
  * This is the second half of what we were born to do, write out the data
- * itself.
+ * itself. Historically this function required you to put your values in the
+ * definition section. This was not the smartest thing to do and a bit of an
+ * oversight to be honest. As such, this function now takes a values argument.
+ * If values is non-null and non-undefined, it will be used to determine the
+ * values. This means that the old method is still supported, but is no longer
+ * acceptable.
  *
  *	def		The array definition of the data to write out with
  *			values
@@ -761,9 +813,13 @@ CTypeParser.prototype.writeStruct = function (def, buffer, offset)
  *	buffer		The buffer to write to
  *
  *	offset		The offset in the buffer to write to
+ *
+ *	values		An array of values to write.
  */
-CTypeParser.prototype.writeData = function (def, buffer, offset)
+CTypeParser.prototype.writeData = function (def, buffer, offset, values)
 {
+	var hv;
+
 	if (def === undefined)
 		throw (new Error('missing definition for what we should be' +
 		    'parsing'));
@@ -776,9 +832,16 @@ CTypeParser.prototype.writeData = function (def, buffer, offset)
 		throw (new Error('missing offset for what we should be ' +
 		    'parsing'));
 
-	ctCheckReq(def, this.types, [ 'value' ]);
+	hv = (values != null && values != undefined);
+	if (hv) {
+		if (!Array.isArray(values))
+			throw (new Error('missing values for writing'));
+		ctCheckReq(def, this.types);
+	} else {
+		ctCheckReq(def, this.types, [ 'value' ]);
+	}
 
-	this.writeStruct(def, buffer, offset);
+	this.writeStruct(hv ? values : getValues(def), def, buffer, offset);
 };
 
 /*

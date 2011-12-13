@@ -8,7 +8,7 @@ function test()
 
 	data = JSON.parse(mod_fs.readFileSync('./struct.json').toString());
 	parser = mod_ctype.parseCTF(data, { endian: 'big' });
-	mod_assert.deepEqual(parser.lstypes(), { 'long': 'uint32_t',
+	mod_assert.deepEqual(parser.lstypes(), { 'long': 'int32_t',
 	    'time_t': 'long',
 	    'timestruc_t': 'struct timespec',
 	    'struct timespec': [ { 'tv_sec': { 'type': 'time_t' } },
