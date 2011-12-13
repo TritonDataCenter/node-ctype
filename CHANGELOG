@@ -4,6 +4,16 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.4.0
+CTYPE-37 Release v0.4.0
+CTYPE-6 want additional entry point for write
+CTYPE-20 Add 64-bit int support into core parser
+CTYPE-31 Fix bounds errors node/2129
+CTYPE-33 Update copyright holders
+CTYPE-34 ctf.js confuses sign bit.
+CTYPE-35 Make the README more useful for getting started
+CTYPE-36 want manual page on ctio functions
+
 v0.3.1
 CTYPE-29 Release 0.3.1
 CTYPE-28 Want v0.6 npm support
