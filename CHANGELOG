@@ -4,6 +4,10 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.5.0
+CTYPE-40 Release 0.5.0
+CTYPE-39 want > 0.6 engine support
+
 v0.4.0
 CTYPE-37 Release v0.4.0
 CTYPE-6 want additional entry point for write
