@@ -775,6 +775,8 @@ CTypeParser.prototype.writeStruct = function (value, def, buffer, offset)
 		/* Now that we've written it out, we can use it for arrays */
 		vals[key] = value[ii];
 	}
+
+	return (offset);
 };
 
 /*
