@@ -111,7 +111,7 @@ function ctReadSint32(endian, buffer, offset)
 function ctReadSint64(endian, buffer, offset)
 {
 	var val = mod_ctio.rsint64(buffer, endian, offset);
-	return ({ value: val, size: 4 });
+	return ({ value: val, size: 8 });
 }
 
 function ctReadFloat(endian, buffer, offset)
