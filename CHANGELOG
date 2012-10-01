@@ -4,6 +4,13 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.5.1
+CTYPE-44 Release 0.5.1
+Contributed by Terin Stock:
+CTYPE-41 CTypeParser.writeStruct should return its offset
+Contributed by Terin Stock:
+CTYPE-42 int64_t returns wrong size
+
 v0.5.0
 CTYPE-40 Release 0.5.0
 CTYPE-39 want > 0.6 engine support
