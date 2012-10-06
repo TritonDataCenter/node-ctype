@@ -4,6 +4,10 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+CTYPE v0.5.2
+CTYPE-46 Release 0.5.2
+CTYPE-45 error in setEndian logic
+
 v0.5.1
 CTYPE-44 Release 0.5.1
 Contributed by Terin Stock:

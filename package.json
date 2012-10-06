@@ -1,6 +1,6 @@
 {
 	"name": "ctype",
-	"version": "0.5.1",
+	"version": "0.5.2",
 	"description": "read and write binary structures and data types",
 	"homepage": "https://github.com/rmustacc/node-ctype",
 	"author": "Robert Mustacchi <rm@fingolfin.org>",
