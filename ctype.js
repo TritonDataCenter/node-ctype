@@ -425,9 +425,9 @@ function CTypeParser(conf)
  */
 CTypeParser.prototype.setEndian = function (endian)
 {
-	if (endian != 'big' || endian != 'little')
+	if (endian != 'big' && endian != 'little')
 		throw (new Error('invalid endian type, must be big or ' +
-		    ' little'));
+		    'little'));
 
 	this.endian = endian;
 };
