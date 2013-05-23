@@ -5,5 +5,9 @@
 	"homepage": "https://github.com/rmustacc/node-ctype",
 	"author": "Robert Mustacchi <rm@fingolfin.org>",
 	"engines": { "node": ">= 0.4" },
-	"main": "ctype.js"
+	"main": "ctype.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/rmustacc/node-ctype.git"
+	}
 }
