@@ -4,6 +4,10 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.5.4
+CTYPE-54 Release v0.5.4
+CTYPE-51 Add "licenses" to package.json
+
 v0.5.3
 CTYPE-50 Release 0.5.3
 Contributed by Nick Schonning:
