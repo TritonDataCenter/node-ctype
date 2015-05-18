@@ -4,7 +4,7 @@
 
 var mod_ctype = require('../../ctype');
 var ASSERT = require('assert');
-var mod_sys = require('sys');
+var mod_util = require('util');
 
 function test()
 {
@@ -37,7 +37,7 @@ function test()
 	p.writeData([ { y: { type: 'uint8_t', value: 3 }},
 	    { x: { type: 'uint8_t[y]', value: [ 0x24, 0x25, 0x26] }}],
 	    buffer, 0);
-	console.log(mod_sys.inspect(buffer));
+	console.log(mod_util.inspect(buffer));
 
 	p.typedef('ssize_t', 'int32_t');
 	ASSERT.deepEqual({ 'ssize_t': 'int32_t' }, p.lstypes());
