@@ -10,6 +10,7 @@
 		"type": "MIT",
 		"url": "https://github.com/rmustacc/node-ctype/blob/master/LICENSE"
 	} ],
+	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/rmustacc/node-ctype.git"
