@@ -4,6 +4,10 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.5.5
+node-ctype#56 Correct SPDX identifier
+ctf2json#55 remove sys
+
 v0.5.4
 CTYPE-54 Release v0.5.4
 CTYPE-51 Add "licenses" to package.json
