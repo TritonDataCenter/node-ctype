@@ -459,6 +459,33 @@ function testWrite()
 	ASSERT.equal(0xff, buf[7]);
 	ASSERT.equal(0x66, buf[8]);
 	ASSERT.equal(0x66, buf[9]);
+
+	data = [ 0x0, 0x1];
+	buf.fill(0x66);
+	mod_ctype.wsint64(data, 'big', buf, 0);
+	ASSERT.equal(0x00, buf[0]);
+	ASSERT.equal(0x00, buf[1]);
+	ASSERT.equal(0x00, buf[2]);
+	ASSERT.equal(0x00, buf[3]);
+	ASSERT.equal(0x00, buf[4]);
+	ASSERT.equal(0x00, buf[5]);
+	ASSERT.equal(0x00, buf[6]);
+	ASSERT.equal(0x01, buf[7]);
+	ASSERT.equal(0x66, buf[8]);
+	ASSERT.equal(0x66, buf[9]);
+
+	buf.fill(0x66);
+	mod_ctype.wsint64(data, 'little', buf, 0);
+	ASSERT.equal(0x01, buf[0]);
+	ASSERT.equal(0x00, buf[1]);
+	ASSERT.equal(0x00, buf[2]);
+	ASSERT.equal(0x00, buf[3]);
+	ASSERT.equal(0x00, buf[4]);
+	ASSERT.equal(0x00, buf[5]);
+	ASSERT.equal(0x00, buf[6]);
+	ASSERT.equal(0x00, buf[7]);
+	ASSERT.equal(0x66, buf[8]);
+	ASSERT.equal(0x66, buf[9]);
 }
 
 /*

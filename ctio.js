@@ -1043,9 +1043,9 @@ function wsint64(value, endian, buffer, offset)
 	 * Once we have this, we can compare it to +inf to see if the number is
 	 * positive or not.
 	 */
-	vzpos = (value[0] * Number.POSITIVE_INFINITY) ==
+	vzpos = (value[0] === 0) || (value[0] * Number.POSITIVE_INFINITY) ==
 	    Number.POSITIVE_INFINITY;
-	vopos = (value[1] * Number.POSITIVE_INFINITY) ==
+	vopos = (value[1] === 0) || (value[1] * Number.POSITIVE_INFINITY) ==
 	    Number.POSITIVE_INFINITY;
 
 	/*
@@ -1070,7 +1070,7 @@ function wsint64(value, endian, buffer, offset)
 	 * value is. We just simply have to make sure we have a valid positive
 	 * integer.
 	 */
-	if (vzpos) {
+	if (vzpos && vopos) {
 		prepuint(value[0], 0x7fffffff);
 		prepuint(value[1], 0xffffffff);
 	} else {
