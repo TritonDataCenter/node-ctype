@@ -4,6 +4,10 @@
 	"description": "read and write binary structures and data types",
 	"homepage": "https://github.com/rmustacc/node-ctype",
 	"author": "Robert Mustacchi <rm@fingolfin.org>",
+    "licenses": [{
+        "type": "MIT",
+        "url": "https://github.com/caolan/async/raw/master/LICENSE"
+    }],
 	"engines": { "node": ">= 0.4" },
 	"main": "ctype.js",
 	"licenses": [ {
