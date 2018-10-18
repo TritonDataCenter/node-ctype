@@ -403,6 +403,7 @@ function CTypeParser(conf)
 
 	this.endian = conf['endian'];
 	this.types = ctGetBasicTypes();
+	this.deferredCheckReqTypes = [];
 
 	/*
 	 * There may be a more graceful way to do this, but this will have to
@@ -486,7 +487,14 @@ CTypeParser.prototype.typedef = function (name, value)
 		this.types[name] = value;
 	} else {
 		/* We have a struct, validate it */
-		ctCheckReq(value, this.types);
+		try {
+			ctCheckReq(value, this.types);
+		} catch (ex) {
+			var notFoundMsg = 'type not found or typdefed: ';
+			if ((ex.message || '').substr(notFoundMsg.length) === notFoundMsg) {
+				this.deferredCheckReqTypes.push(value);
+			}
+		}
 		this.types[name] = value;
 	}
 };
@@ -844,6 +852,15 @@ CTypeParser.prototype.writeData = function (def, buffer, offset, values)
 	}
 
 	this.writeStruct(hv ? values : getValues(def), def, buffer, offset);
+};
+
+CTypeParser.prototype.checkDeferred = function ()
+{
+	var ii;
+
+	for (ii = 0; ii < this.deferredCheckReqTypes.length; ii++) {
+		ctCheckReq(this.deferredCheckReqTypes[ii], this.types);
+	}
 };
 
 /*

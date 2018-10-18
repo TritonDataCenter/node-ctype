@@ -4,6 +4,9 @@ in it. The commit message also has the corresponding github issue. i.e. CTYPE-42
 would be issue 42. Each issue can be found at:
 https://github.com/rmustacc/node-ctype/issues/%d.
 
+v0.5.6
+node-ctype#64 Handle deferred CTF type definitions
+
 v0.5.5
 node-ctype#56 Correct SPDX identifier
 ctf2json#55 remove sys

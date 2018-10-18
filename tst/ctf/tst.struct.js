@@ -10,9 +10,13 @@ function test()
 	parser = mod_ctype.parseCTF(data, { endian: 'big' });
 	mod_assert.deepEqual(parser.lstypes(), { 'long': 'int32_t',
 	    'time_t': 'long',
+	    'struct timespec': [ { tv_sec: { type: 'time_t' } },
+		{ tv_nsec: { type: 'long' } },
+		{ ctxoption: { type: 'contextoption_t' } } ],
 	    'timestruc_t': 'struct timespec',
-	    'struct timespec': [ { 'tv_sec': { 'type': 'time_t' } },
-	        { 'tv_nsec': { 'type': 'long' } } ] });
+	    'struct contextoption': [ { options: { type: 'long' } } ],
+	    'contextoption_t': 'struct contextoption'
+	});
 }
 
 test();
