@@ -12,8 +12,13 @@
 		{ "name": "time_t", "typedef": "long" },
 		{ "name": "struct timespec", "struct": [
 			{ "name": "tv_sec", "type": "time_t" },
-			{ "name": "tv_nsec", "type": "long" }
+			{ "name": "tv_nsec", "type": "long" },
+			{ "name": "ctxoption", "type": "contextoption_t" }
 		] },
-		{ "name": "timestruc_t", "typedef": "struct timespec" }
+		{ "name": "timestruc_t", "typedef": "struct timespec" },
+		{ "name": "struct contextoption", "struct": [
+			{ "name": "options", "type": "long" }
+                ] },
+		{ "name": "contextoption_t", "typedef": "struct contextoption" }
 	]
 }

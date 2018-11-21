@@ -240,6 +240,8 @@ function ctfParseJson(json, ctype)
 
 	for (ii = 0; ii < json['data'].length; ii++)
 		ctfParseEntry(json['data'][ii], ctype);
+
+	ctype.checkDeferred();
 }
 
 exports.ctfParseJson = ctfParseJson;
